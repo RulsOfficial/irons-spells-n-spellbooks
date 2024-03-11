@@ -6,7 +6,12 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
+import io.redspace.ironsspellbooks.util.MinecraftInstanceHelper;
+import joptsimple.internal.Strings;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.screens.Overlay;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
@@ -16,14 +21,19 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.RenderNameTagEvent;
 
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 public class AlchemistCauldronRenderer implements BlockEntityRenderer<AlchemistCauldronTile> {
@@ -58,6 +68,39 @@ public class AlchemistCauldronRenderer implements BlockEntityRenderer<AlchemistC
                         yRot, cauldron, partialTick, poseStack, bufferSource, packedLight, packedOverlay);
             }
         }
+        MinecraftInstanceHelper.ifPlayerPresent(player -> {
+            int d = 3;
+            if (player.isCrouching() && Math.abs(player.getX() - cauldron.getBlockPos().getX()) < d && Math.abs(player.getY() - cauldron.getBlockPos().getY()) < d && Math.abs(player.getZ() - cauldron.getBlockPos().getZ()) < d) {
+                renderNameTag(cauldron.resultItems.stream().filter(item -> !item.isEmpty()).collect(Collectors.toList()), poseStack, bufferSource, packedLight);
+            }
+        });
+    }
+
+    protected void renderNameTag(List<ItemStack> items, PoseStack poseStack, MultiBufferSource pBuffer, int pPackedLight) {
+        if (items.size() == 0) {
+            return;
+        }
+        poseStack.pushPose();
+        poseStack.translate(0.5D, 1.5f, 0.5D);
+        poseStack.mulPose(Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation());
+        poseStack.scale(-0.025F, -0.025F, 0.025F);
+        Matrix4f matrix4f = poseStack.last().pose();
+        float f1 = Minecraft.getInstance().options.getBackgroundOpacity(0.25F);
+        int j = (int) (f1 * 255.0F) << 24;
+        Font font = Minecraft.getInstance().font;
+        Component text = Component.literal(Strings.repeat(' ', items.size() * 4));
+        float f2 = (float) (-font.width(text) / 2);
+        font.drawInBatch(text, f2, 0, 553648127, false, matrix4f, pBuffer, false, j, pPackedLight);
+        for (int k = 0; k < items.size(); k++) {
+            var item = items.get(k);
+            poseStack.pushPose();
+            poseStack.scale(-0.25f / 0.025F, -0.25f / 0.025F, 0.25f / 0.025F);
+            poseStack.translate((k - (items.size() - 1) / 2f) * 1.5, -0.4, 0);
+            itemRenderer.renderStatic(item, ItemTransforms.TransformType.FIXED, pPackedLight, OverlayTexture.NO_OVERLAY, poseStack, pBuffer, 0);
+            poseStack.popPose();
+        }
+
+        poseStack.popPose();
     }
 
     public Vec2 getFloatingItemOffset(float time, int offset) {

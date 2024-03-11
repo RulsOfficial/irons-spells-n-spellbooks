@@ -426,16 +426,23 @@ public class AlchemistCauldronTile extends BlockEntity implements WorldlyContain
             }
             return null;
         });
-        createInkInteraction(map, ItemRegistry.INK_COMMON);
-        createInkInteraction(map, ItemRegistry.INK_UNCOMMON);
-        createInkInteraction(map, ItemRegistry.INK_RARE);
-        createInkInteraction(map, ItemRegistry.INK_EPIC);
-        createInkInteraction(map, ItemRegistry.INK_LEGENDARY);
+        createBottledInteraction(map, ItemRegistry.INK_COMMON);
+        createBottledInteraction(map, ItemRegistry.INK_UNCOMMON);
+        createBottledInteraction(map, ItemRegistry.INK_RARE);
+        createBottledInteraction(map, ItemRegistry.INK_EPIC);
+        createBottledInteraction(map, ItemRegistry.INK_LEGENDARY);
+        createBottledInteraction(map, ItemRegistry.EVASION_ELIXIR);
+        createBottledInteraction(map, ItemRegistry.GREATER_EVASION_ELIXIR);
+        createBottledInteraction(map, ItemRegistry.OAKSKIN_ELIXIR);
+        createBottledInteraction(map, ItemRegistry.GREATER_OAKSKIN_ELIXIR);
+        createBottledInteraction(map, ItemRegistry.INVISIBILITY_ELIXIR);
+        createBottledInteraction(map, ItemRegistry.GREATER_INVISIBILITY_ELIXIR);
+        createBottledInteraction(map, ItemRegistry.GREATER_HEALING_POTION);
 
         return map;
     }
 
-    private static void createInkInteraction(Object2ObjectOpenHashMap<Item, AlchemistCauldronInteraction> map, RegistryObject<Item> ink) {
+    private static void createBottledInteraction(Object2ObjectOpenHashMap<Item, AlchemistCauldronInteraction> map, RegistryObject<Item> ink) {
         map.put(ink.get(), (blockState, level, pos, currentLevel, itemstack) -> {
             if (currentLevel > 0 && level.getBlockEntity(pos) instanceof AlchemistCauldronTile tile) {
                 if (!isFull(tile.resultItems)) {

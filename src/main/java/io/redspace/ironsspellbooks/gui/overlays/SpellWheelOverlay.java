@@ -78,7 +78,7 @@ public class SpellWheelOverlay implements IGuiOverlay {
         PoseStack poseStack = guiHelper.pose();
         poseStack.pushPose();
 
-        int centerX = screenWidth / 8;
+        int centerX = screenWidth / 9;
         int centerY = screenHeight / 5;
 
         Vec2 screenCenter = new Vec2(minecraft.getWindow().getScreenWidth() * .5f, minecraft.getWindow().getScreenHeight() * .5f);
